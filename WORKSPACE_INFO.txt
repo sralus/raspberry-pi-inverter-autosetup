@@ -1,0 +1,15 @@
+GitHub-Arbeitsbasis für das Auto-Setup-Projekt.
+
+Ziel:
+- PI30 / WR1 unter watchpower-like
+- PI18 / WR2 unter solarpower-like
+- built-in UI als Standard
+- kein Pflicht-Webserver
+- keine Produktivpfade als Standard
+
+Wichtige Regeln:
+- keine Live-Systempfade als Repo-Standard
+- keine /var/www/html-Pflicht
+- keine /home/pi/wr-reader-Pflicht
+- Services werden im Repo als Vorlagen vorbereitet
+- Installer sind built-in-first ausgelegt

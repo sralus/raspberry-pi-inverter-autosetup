@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WR1 Parameter UI</title>
+  <style>
+    :root{
+      --bg:#6d6d6d;
+      --panel:#747474;
+      --panel2:#6a6a6a;
+      --line:#9a9a9a;
+      --text:#f2f2f2;
+      --muted:#dedede;
+      --value-bg:#8a8a8a;
+      --value-border:#b8b8b8;
+      --btn:#cfcfcf;
+      --btn-text:#222;
+      --ok:#5f9f65;
+      --err:#a65d5d;
+      --info:#7289a8;
+      --warn:#b58f4c;
+      --accent:#cfd7e2;
+    }
+
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size:14px;
+    }
+
+    .wrap{
+      width:min(1260px, calc(100vw - 24px));
+      margin:10px auto;
+      border:1px solid #8f8f8f;
+      background:var(--panel2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
+    .titlebar{
+      background:#5f5f5f;
+      border-bottom:1px solid #8b8b8b;
+      padding:8px 12px;
+      font-weight:bold;
+      letter-spacing:.2px;
+    }
+
+    .content{
+      padding:10px;
+    }
+
+    .group{
+      border:1px solid var(--line);
+      background:var(--panel);
+      margin-bottom:10px;
+    }
+
+    .group-title{
+      padding:6px 10px;
+      font-weight:bold;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    .grid-3{
+      display:grid;
+      grid-template-columns: 220px 1fr 74px;
+      gap:8px 10px;
+      padding:10px;
+      align-items:center;
+    }
+
+    .grid-4{
+      display:grid;
+      grid-template-columns: 220px 1fr 220px 1fr;
+      gap:8px 14px;
+      padding:10px;
+      align-items:center;
+    }
+
+    .grid-edit{
+      display:grid;
+      grid-template-columns: 250px 1fr 74px 250px 1fr 74px;
+      gap:8px 10px;
+      padding:10px;
+      align-items:center;
+    }
+
+    .grid-metrics{
+      display:grid;
+      grid-template-columns: repeat(6, minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+    }
+
+    .metric{
+      border:1px solid var(--line);
+      background:#7a7a7a;
+      min-height:66px;
+      padding:8px 10px;
+      box-sizing:border-box;
+    }
+
+    .metric .k{
+      color:#f3f3f3;
+      font-size:12px;
+      margin-bottom:6px;
+    }
+
+    .metric .v{
+      font-size:18px;
+      font-weight:bold;
+      color:#fff;
+    }
+
+    .label{
+      text-align:right;
+      white-space:nowrap;
+      color:#fff;
+    }
+
+    .value,
+    .readonly,
+    select,
+    input[type="text"]{
+      width:100%;
+      box-sizing:border-box;
+      min-height:26px;
+      border:1px solid var(--value-border);
+      background:var(--value-bg);
+      color:#fff;
+      padding:3px 8px;
+      font-size:14px;
+    }
+
+    .readonly{
+      display:flex;
+      align-items:center;
+    }
+
+    select{
+      appearance:auto;
+      cursor:pointer;
+    }
+
+    .btn{
+      min-height:26px;
+      border:1px solid #eeeeee;
+      background:var(--btn);
+      color:var(--btn-text);
+      cursor:pointer;
+      padding:0 10px;
+    }
+
+    .btn:disabled{
+      opacity:.65;
+      cursor:default;
+    }
+
+    .statusbar{
+      margin-top:8px;
+      border:1px solid var(--line);
+      padding:9px 12px;
+      background:#717171;
+      color:#fff;
+    }
+
+    .applybar{
+      margin-top:8px;
+      border:1px solid var(--line);
+      padding:10px 12px;
+      color:#fff;
+      min-height:20px;
+    }
+
+    .apply-ok{ background:var(--ok); }
+    .apply-err{ background:var(--err); }
+    .apply-info{ background:var(--info); }
+    .apply-warn{ background:var(--warn); }
+
+    .footer{
+      margin-top:8px;
+      padding:8px 10px;
+      border-top:1px solid var(--line);
+      color:#fff;
+      background:#656565;
+      font-size:12px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .lamp{
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      display:inline-block;
+      border:1px solid rgba(0,0,0,.35);
+      box-shadow:0 0 8px rgba(255,255,255,.18);
+      background:#b8a84d;
+    }
+
+    .lamp.ok{ background:#70b36f; }
+    .lamp.err{ background:#ba6969; }
+    .lamp.warn{ background:#c7a751; }
+    .lamp.unk{ background:#979797; }
+
+    @media (max-width: 1180px){
+      .grid-edit{
+        grid-template-columns: 230px 1fr 74px;
+      }
+      .grid-metrics{
+        grid-template-columns: repeat(3, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 760px){
+      .grid-4,
+      .grid-3,
+      .grid-edit{
+        grid-template-columns: 1fr;
+      }
+      .label{
+        text-align:left;
+      }
+      .grid-metrics{
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="titlebar">WR1 Parameter setting</div>
+    <div class="content">
+
+      <div class="group">
+        <div class="group-title">Basic information</div>
+        <div class="grid-4" id="basicInfoGrid"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Parameters setting</div>
+        <div class="grid-edit" id="editableGrid"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Live values</div>
+        <div class="grid-metrics">
+          <div class="metric"><div class="k">PV-Leistung gesamt</div><div class="v" id="pv_input_power_w">--</div></div>
+          <div class="metric"><div class="k">Last / Verbrauch</div><div class="v" id="load_watt">--</div></div>
+          <div class="metric"><div class="k">Batteriespannung</div><div class="v" id="battery_voltage_v">--</div></div>
+          <div class="metric"><div class="k">Ladestrom</div><div class="v" id="battery_charge_current_a">--</div></div>
+          <div class="metric"><div class="k">SOC Batterie</div><div class="v" id="battery_capacity_percent">--</div></div>
+          <div class="metric"><div class="k">WR-Temperatur</div><div class="v" id="heatsink_temperature_c">--</div></div>
+        </div>
+      </div>
+
+      <div class="statusbar" id="statusLine">Lade Daten …</div>
+      <div class="applybar apply-info" id="applyStatus">Bereit. Änderungen werden robust verifiziert.</div>
+
+      <div class="footer" id="footerLine">
+        Modus: -- | Write verifiziert: POP00, POP01, POP02, PCP00, PCP02, PCP03, PBCV, PBDV, PSDV, PCVV, PBFT |
+        Lesen verifiziert: QMOD, QPIGS, QID, QPIRI, QPIWS, QFLAG | Datenalter: -- | Felder: --
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let latestState = null;
+    let isApplying = false;
+    let refreshTimer = null;
+    let uiBusyUntil = 0;
+    let applyBusyUntil = 0;
+
+    function nowMs(){
+      return Date.now();
+    }
+
+    function markUiBusy(ms = 12000){
+      uiBusyUntil = Math.max(uiBusyUntil, nowMs() + ms);
+    }
+
+    function releaseUiBusy(delayMs = 1200){
+      uiBusyUntil = Math.max(uiBusyUntil, nowMs() + delayMs);
+    }
+
+    function markApplyBusy(ms = 5000){
+      applyBusyUntil = Math.max(applyBusyUntil, nowMs() + ms);
+    }
+
+    function refreshBlocked(){
+      return isApplying || nowMs() < uiBusyUntil || nowMs() < applyBusyUntil;
+    }
+
+    function esc(v){
+      return String(v ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function fmt(v, suffix=""){
+      if (v === null || v === undefined || v === "") return "--";
+      return String(v) + suffix;
+    }
+
+    function normalizeVoltageText(v){
+      if (v === null || v === undefined) return "";
+      const s = String(v).replace(",", ".").replace(/\s*V$/i, "").trim();
+      const n = Number(s);
+      if (!Number.isFinite(n)) return "";
+      return n.toFixed(1);
+    }
+
+    function chooseCurrent(cfg){
+      if (!cfg) return "";
+      if (cfg.current_raw !== undefined && cfg.current_raw !== null && String(cfg.current_raw).trim() !== "" && String(cfg.current_raw).trim() !== "--") {
+        return String(cfg.current_raw).trim();
+      }
+      if (cfg.current_text !== undefined && cfg.current_text !== null) {
+        return normalizeVoltageText(cfg.current_text);
+      }
+      return "";
+    }
+
+    function buildOptions(cfg){
+      const current = chooseCurrent(cfg);
+      const opts = Array.isArray(cfg?.options) ? cfg.options : [];
+      return opts.map(o => {
+        const value = esc(o.value ?? "");
+        const label = esc(o.label ?? o.value ?? "");
+        const enabled = !!o.enabled;
+        const sel = normalizeVoltageText(o.value) === normalizeVoltageText(current) ? " selected" : "";
+        const dis = enabled ? "" : " disabled";
+        return `<option value="${value}"${sel}${dis}>${label}${sel ? " \u2190 aktiv" : ""}</option>`;
+      }).join("");
+    }
+
+    function setApplyStatus(kind, text){
+      const el = document.getElementById("applyStatus");
+      el.className = "applybar " + (
+        kind === "ok" ? "apply-ok" :
+        kind === "err" ? "apply-err" :
+        kind === "warn" ? "apply-warn" : "apply-info"
+      );
+      el.textContent = text;
+    }
+
+    function formatMetric(v, suffix){
+      if (v === null || v === undefined || v === "") return "--";
+      return `${v}${suffix}`;
+    }
+
+    function renderBasicInfo(data){
+      const m = data.metrics || {};
+      const online = data.online;
+      const lampClass = online === true ? "ok" : (online === false ? "err" : "unk");
+      const onlineText = data.online_text || (online === true ? "WR1 online" : (online === false ? "WR1 offline" : "WR1 Status unbekannt"));
+
+      const fields = [
+        ["WR online", `<span class="pill"><span class="lamp ${lampClass}"></span>${esc(onlineText)}</span>`, true],
+        ["Last %", fmt(m.load_percent, " %")],
+        ["Output priority", data.editable?.output_priority?.current_text || "--"],
+        ["Last VA", fmt(m.load_va, " VA")],
+        ["Charger priority", data.editable?.charger_priority?.current_text || "--"],
+        ["Wh heute", fmt(m.wh_today, " Wh")],
+        ["Seriennummer", data.settings_left?.find(x => x.label === "Seriennummer")?.value || data.device_serial || "--"],
+        ["Flags roh", data.settings_right?.find(x => x.label === "Flags roh")?.value || "--"],
+        ["Statusbits roh", data.settings_left?.find(x => x.label === "Statusbits roh")?.value || "--"],
+        ["Warnungen", data.extra_info?.find(x => x.label === "Warnungen")?.value || "--"],
+        ["Datenalter", data.settings_left?.find(x => x.label === "Datenalter")?.value || "--"],
+        ["Modus", data.mode_text || "--"],
+        ["Nennleistung", data.extra_info?.find(x => x.label === "Nennleistung")?.value || "--"],
+        ["Aktueller Back-to-grid-Wert", data.editable?.recharge_voltage?.current_text || "--"],
+        ["Cutoff / Back to grid", `${fmt(data.current_values?.battery_cutoff_voltage_v || data.current_values?.piri_battery_cutoff_voltage_v || data.raw_data?.piri_battery_cutoff_voltage_v || "48.0", " V")} / ${fmt(data.editable?.recharge_voltage?.current_text || data.current_values?.battery_recharge_voltage_v || data.current_values?.piri_battery_recharge_voltage_v, "")}`],
+        ["Aktueller Back-to-discharge-Wert", data.editable?.redischarge_voltage?.current_text || "--"],
+        ["Back to discharge", fmt(
+          data.editable?.redischarge_voltage?.current_text ||
+          (data.current_values?.battery_redischarge_voltage_2_v ? `${data.current_values.battery_redischarge_voltage_2_v} V` : "") ||
+          (data.current_values?.piri_battery_redischarge_voltage_2_v ? `${data.current_values.piri_battery_redischarge_voltage_2_v} V` : "") ||
+          data.current_values?.battery_redischarge_voltage_v ||
+          data.current_values?.piri_battery_redischarge_voltage_v ||
+          "--"
+        )],
+        ["Aktueller Bulk-Wert", data.editable?.bulk_voltage?.current_text || "--"],
+        ["Bulk / Float", `${data.editable?.bulk_voltage?.current_text || "--"} / ${data.editable?.float_voltage?.current_text || "--"}`],
+        ["Aktueller Float-Wert", data.editable?.float_voltage?.current_text || "--"],
+        ["Max. AC / Gesamt Ladestrom", data.extra_info?.find(x => x.label === "Max. AC / Gesamt Ladestrom")?.value || "--"]
+      ];
+
+      document.getElementById("basicInfoGrid").innerHTML = fields.map(([k,v,isHtml]) => `
+        <div class="label">${esc(k)}</div>
+        <div class="readonly">${isHtml ? v : esc(v)}</div>
+      `).join("");
+    }
+
+    function renderEditable(data){
+      const out = data.editable?.output_priority;
+      const chg = data.editable?.charger_priority;
+      const rec = data.editable?.recharge_voltage;
+      const red = data.editable?.redischarge_voltage;
+      const cutoff = data.editable?.cutoff_voltage;
+      const bulk = data.editable?.bulk_voltage;
+      const flo = data.editable?.float_voltage;
+
+      const rows = [
+        [
+          "Output source priority",
+          out ? `<select id="sel_output_priority">${buildOptions(out)}</select>` : `<div class="readonly">--</div>`,
+          out ? `<button class="btn" onclick="applyOutputPriority()" ${isApplying ? "disabled" : ""}>Apply</button>` : `<button class="btn" disabled>Apply</button>`,
+          "Aktueller Output-Modus",
+          `<div class="readonly">${esc(out?.current_text || "--")}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Charger source priority",
+          chg ? `<select id="sel_charger_priority">${buildOptions(chg)}</select>` : `<div class="readonly">--</div>`,
+          chg ? `<button class="btn" onclick="applyChargerPriority()" ${isApplying ? "disabled" : ""}>Apply</button>` : `<button class="btn" disabled>Apply</button>`,
+          "Aktueller Charger-Modus",
+          `<div class="readonly">${esc(chg?.current_text || "--")}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Back to grid voltage for SBU priority",
+          rec ? `<select id="sel_recharge_voltage">${buildOptions(rec)}</select>` : `<div class="readonly">--</div>`,
+          rec ? `<button class="btn" onclick="applyRechargeVoltage()" ${isApplying ? "disabled" : ""}>Apply</button>` : `<button class="btn" disabled>Apply</button>`,
+          "Aktueller Back-to-grid-Wert",
+          `<div class="readonly">${esc(rec?.current_text || "--")}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Back to discharge voltage",
+          red ? `<select id="sel_redischarge_voltage">${buildOptions(red)}</select>` : `<div class="readonly">--</div>`,
+          red ? `<button class="btn" onclick="applyRedischargeVoltage()" ${isApplying ? "disabled" : ""}>Apply</button>` : `<button class="btn" disabled>Apply</button>`,
+          "Aktueller Back-to-discharge-Wert",
+          `<div class="readonly">${esc(red?.current_text || "--")}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Cut-off voltage",
+          cutoff ? `<select id="sel_cutoff_voltage">${buildOptions(cutoff)}</select>` : `<div class="readonly">--</div>`,
+          cutoff ? `<button class="btn" onclick="applyCutoffVoltage()" ${isApplying ? "disabled" : ""}>Apply</button>` : `<button class="btn" disabled>Apply</button>`,
+          "Aktueller Cut-off-Wert",
+          `<div class="readonly">${esc(cutoff?.current_text || fmt(
+            data.current_values?.battery_cutoff_voltage_v ??
+            data.current_values?.piri_battery_cutoff_voltage_v ??
+            data.raw_data?.piri_battery_cutoff_voltage_v ??
+            "--",
+            (data.current_values?.battery_cutoff_voltage_v ??
+             data.current_values?.piri_battery_cutoff_voltage_v ??
+             data.raw_data?.piri_battery_cutoff_voltage_v) != null ? " V" : ""
+          ))}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Bulk charging voltage (C.V. voltage)",
+          bulk ? `<select id="sel_bulk_voltage">${buildOptions(bulk)}</select>` : `<div class="readonly">--</div>`,
+          bulk ? `<button class="btn" onclick="applyBulkVoltage()" ${isApplying ? "disabled" : ""}>Apply</button>` : `<button class="btn" disabled>Apply</button>`,
+          "Aktueller Bulk-Wert",
+          `<div class="readonly">${esc(bulk?.current_text || "--")}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Floating charging voltage",
+          flo ? `<select id="sel_float_voltage">${buildOptions(flo)}</select>` : `<div class="readonly">--</div>`,
+          flo ? `<button class="btn" onclick="applyFloatVoltage()" ${isApplying ? "disabled" : ""}>Apply</button>` : `<button class="btn" disabled>Apply</button>`,
+          "Aktueller Float-Wert",
+          `<div class="readonly">${esc(flo?.current_text || "--")}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ]
+      ];
+
+      document.getElementById("editableGrid").innerHTML = rows.map(r => `
+        <div class="label">${r[0]}</div>
+        <div>${r[1]}</div>
+        <div>${r[2]}</div>
+        <div class="label">${r[3]}</div>
+        <div>${r[4]}</div>
+        <div>${r[5]}</div>
+      `).join("");
+    }
+
+    function renderMetrics(data){
+      const m = data.metrics || {};
+      document.getElementById("pv_input_power_w").textContent = formatMetric(m.pv_input_power_w, " W");
+      document.getElementById("load_watt").textContent = formatMetric(m.load_watt, " W");
+      document.getElementById("battery_voltage_v").textContent = formatMetric(m.battery_voltage_v, " V");
+      document.getElementById("battery_charge_current_a").textContent = formatMetric(m.battery_charge_current_a, " A");
+      document.getElementById("battery_capacity_percent").textContent = formatMetric(m.battery_capacity_percent, " %");
+      document.getElementById("heatsink_temperature_c").textContent = formatMetric(m.heatsink_temperature_c, " °C");
+    }
+
+    function renderStatusLine(data){
+      const online = data.online;
+      const lampClass = online === true ? "ok" : (online === false ? "err" : "unk");
+      const mode = data.mode_text || "--";
+      const pv = data.metrics?.pv_input_power_w ?? "--";
+      const load = data.metrics?.load_watt ?? "--";
+      const warn = data.extra_info?.find(x => x.label === "Warnungen")?.value || "--";
+      const out = data.editable?.output_priority?.current_text || "--";
+      const chg = data.editable?.charger_priority?.current_text || "--";
+
+      document.getElementById("statusLine").innerHTML =
+        `<span class="pill"><span class="lamp ${lampClass}"></span>` +
+        `Aktueller WR1 Status: Modus ${esc(mode)} | PV ${esc(pv)} W | Last ${esc(load)} W | ${esc(warn)} | Output: ${esc(out)} | Charger: ${esc(chg)}</span>`;
+    }
+
+    function renderFooter(data){
+      const age = data.settings_left?.find(x => x.label === "Datenalter")?.value || "--";
+      const fields = data.field_count ?? "--";
+      document.getElementById("footerLine").textContent =
+        `Modus: ${data.mode_text || "--"} | Write verifiziert: POP00, POP01, POP02, PCP00, PCP02, PCP03, PBCV, PBDV, PSDV, PCVV, PBFT | ` +
+        `Lesen verifiziert: QMOD, QPIGS, QID, QPIRI, QPIWS, QFLAG | Datenalter: ${age} | Felder: ${fields}`;
+    }
+
+    function installUiBusyHandlers(){
+      document.querySelectorAll("select").forEach(sel => {
+        if (sel.dataset.uiBusyBound === "1") return;
+        sel.dataset.uiBusyBound = "1";
+
+        sel.addEventListener("focus", () => { markUiBusy(15000); });
+        sel.addEventListener("mousedown", () => { markUiBusy(15000); });
+        sel.addEventListener("touchstart", () => { markUiBusy(15000); }, { passive: true });
+        sel.addEventListener("click", () => { markUiBusy(15000); });
+        sel.addEventListener("pointerdown", () => { markUiBusy(15000); });
+
+        sel.addEventListener("change", () => { releaseUiBusy(1800); });
+        sel.addEventListener("blur", () => { releaseUiBusy(1800); });
+
+        sel.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" || e.key === "Enter" || e.key === "Tab") {
+            releaseUiBusy(1800);
+          } else {
+            markUiBusy(15000);
+          }
+        });
+      });
+    }
+
+    async function refreshData(keepStatus){
+      try{
+        const r = await fetch("wr1_state.json?v=" + Date.now(), { cache: "no-store" });
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        const data = await r.json();
+        latestState = data;
+        renderBasicInfo(data);
+        renderEditable(data);
+        renderMetrics(data);
+        renderStatusLine(data);
+        renderFooter(data);
+        installUiBusyHandlers();
+        if (!keepStatus) setApplyStatus("info", "Bereit. Änderungen werden robust verifiziert.");
+      }catch(e){
+        setApplyStatus("err", "Laden von wr1_state.json fehlgeschlagen: " + e.message);
+      }
+    }
+
+    async function doApply(action, value, successText){
+      if(isApplying) return;
+      isApplying = true;
+      markUiBusy(2500);
+      markApplyBusy(7000);
+      renderEditable(latestState || {});
+      installUiBusyHandlers();
+      setApplyStatus("info", `Sende ${action} = ${value} ...`);
+
+      try{
+        const r = await fetch("/api/wr1-api.php?v=" + Date.now(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json;charset=UTF-8" },
+          body: JSON.stringify({ action, value }),
+          cache: "no-store"
+        });
+
+        const txt = await r.text();
+        let obj = null;
+        try { obj = JSON.parse(txt); } catch(_) {}
+
+        if(!r.ok){
+          throw new Error(obj?.error || txt || ("HTTP " + r.status));
+        }
+
+        if(obj && obj.ok === false){
+          throw new Error(obj.error || obj.raw_output || "Apply fehlgeschlagen");
+        }
+
+        setApplyStatus("ok", successText + (obj?.verified_by ? ` | OK: ${obj.verified_by}` : " | OK: apply ->"));
+
+        setTimeout(() => { if (!refreshBlocked()) refreshData(true); }, 1200);
+        setTimeout(() => { if (!refreshBlocked()) refreshData(true); }, 3200);
+        setTimeout(() => { if (!refreshBlocked()) refreshData(true); }, 6200);
+      }catch(e){
+        setApplyStatus("err", "Apply fehlgeschlagen: " + e.message);
+      }finally{
+        isApplying = false;
+        releaseUiBusy(2200);
+        renderEditable(latestState || {});
+        installUiBusyHandlers();
+      }
+    }
+
+    function getSel(id){
+      const el = document.getElementById(id);
+      return el ? String(el.value || "").trim() : "";
+    }
+
+    function applyOutputPriority(){ return doApply("set_output_priority", getSel("sel_output_priority"), "Output source priority erfolgreich gesetzt."); }
+    function applyChargerPriority(){ return doApply("set_charger_priority", getSel("sel_charger_priority"), "Charger source priority erfolgreich gesetzt."); }
+    function applyRechargeVoltage(){ return doApply("set_recharge_voltage", getSel("sel_recharge_voltage"), "Back to grid voltage erfolgreich gesetzt."); }
+    function applyRedischargeVoltage(){ return doApply("set_redischarge_voltage", getSel("sel_redischarge_voltage"), "Back to discharge voltage erfolgreich gesetzt."); }
+    function applyCutoffVoltage(){ return doApply("set_cutoff_voltage", getSel("sel_cutoff_voltage"), "Cut-off voltage erfolgreich gesetzt."); }
+    function applyBulkVoltage(){ return doApply("set_bulk_voltage", getSel("sel_bulk_voltage"), "Bulk voltage erfolgreich gesetzt."); }
+    function applyFloatVoltage(){ return doApply("set_float_voltage", getSel("sel_float_voltage"), "Float voltage erfolgreich gesetzt."); }
+
+    refreshData(false);
+    refreshTimer = setInterval(() => {
+      if(!refreshBlocked()) refreshData(true);
+    }, 5000);
+  </script>
+</body>
+</html>

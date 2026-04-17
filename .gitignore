@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.bak
+*.tmp
+*.swp
+*~
+_phase2_backup_*/
+_backup_before_rebuild_*/
+gitbau_import_stage_*/
+.rebuild_marker_*
+build/

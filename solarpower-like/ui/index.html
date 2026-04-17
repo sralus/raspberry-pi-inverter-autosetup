@@ -1,0 +1,703 @@
+<!-- WR2 CACHE BUST 1775751912 -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WR2 Parameter UI v1775751912</title>
+  <style>
+    :root{
+      --bg:#6d6d6d;
+      --panel:#747474;
+      --panel2:#6a6a6a;
+      --line:#9a9a9a;
+      --text:#f2f2f2;
+      --value-bg:#8a8a8a;
+      --value-border:#b8b8b8;
+      --btn:#cfcfcf;
+      --btn-text:#222;
+      --ok:#5f9f65;
+      --err:#a65d5d;
+      --info:#7289a8;
+      --warn:#b58f4c;
+      --lock:#7b7b7b;
+    }
+
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:14px;
+    }
+
+    .wrap{
+      width:min(1260px, calc(100vw - 24px));
+      margin:10px auto;
+      border:1px solid #8f8f8f;
+      background:var(--panel2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
+    .titlebar{
+      background:#5f5f5f;
+      border-bottom:1px solid #8b8b8b;
+      padding:8px 12px;
+      font-weight:bold;
+      letter-spacing:.2px;
+    }
+
+    .content{ padding:10px; }
+
+    .group{
+      border:1px solid var(--line);
+      background:var(--panel);
+      margin-bottom:10px;
+    }
+
+    .group-title{
+      padding:6px 10px;
+      font-weight:bold;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    .grid-4{
+      display:grid;
+      grid-template-columns: 220px 1fr 220px 1fr;
+      gap:8px 14px;
+      padding:10px;
+      align-items:center;
+    }
+
+    .grid-edit{
+      display:grid;
+      grid-template-columns: 250px 1fr 74px 250px 1fr 74px;
+      gap:8px 10px;
+      padding:10px;
+      align-items:center;
+    }
+
+    .grid-metrics{
+      display:grid;
+      grid-template-columns: repeat(6, minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+    }
+
+    .metric{
+      border:1px solid var(--line);
+      background:#7a7a7a;
+      min-height:66px;
+      padding:8px 10px;
+      box-sizing:border-box;
+    }
+
+    .metric .k{
+      color:#f3f3f3;
+      font-size:12px;
+      margin-bottom:6px;
+    }
+
+    .metric .v{
+      font-size:18px;
+      font-weight:bold;
+      color:#fff;
+    }
+
+    .label{
+      text-align:right;
+      white-space:nowrap;
+      color:#fff;
+    }
+
+    .readonly,
+    select{
+      width:100%;
+      box-sizing:border-box;
+      min-height:26px;
+      border:1px solid var(--value-border);
+      background:var(--value-bg);
+      color:#fff;
+      padding:3px 8px;
+      font-size:14px;
+    }
+
+    .readonly{
+      display:flex;
+      align-items:center;
+    }
+
+    select{
+      appearance:auto;
+      cursor:pointer;
+    }
+
+    .btn{
+      min-height:26px;
+      border:1px solid #eeeeee;
+      background:var(--btn);
+      color:var(--btn-text);
+      cursor:pointer;
+      padding:0 10px;
+    }
+
+    .btn:disabled{
+      opacity:.65;
+      cursor:default;
+    }
+
+    .status-ok{ background:var(--ok); justify-content:center; font-weight:bold; }
+    .status-err{ background:var(--err); justify-content:center; font-weight:bold; }
+    .status-lock{ background:var(--lock); justify-content:center; font-weight:bold; }
+
+    .statusbar{
+      margin-top:8px;
+      border:1px solid var(--line);
+      padding:9px 12px;
+      background:#717171;
+      color:#fff;
+    }
+
+    .applybar{
+      margin-top:8px;
+      border:1px solid var(--line);
+      padding:10px 12px;
+      color:#fff;
+      min-height:20px;
+    }
+
+    .apply-ok{ background:var(--ok); }
+    .apply-err{ background:var(--err); }
+    .apply-info{ background:var(--info); }
+    .apply-warn{ background:var(--warn); }
+
+    .footer{
+      margin-top:8px;
+      padding:8px 10px;
+      border-top:1px solid var(--line);
+      color:#fff;
+      background:#656565;
+      font-size:12px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .lamp{
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      display:inline-block;
+      border:1px solid rgba(0,0,0,.35);
+      box-shadow:0 0 8px rgba(255,255,255,.18);
+      background:#b8a84d;
+    }
+
+    .lamp.ok{ background:#70b36f; }
+    .lamp.err{ background:#ba6969; }
+    .lamp.warn{ background:#c7a751; }
+    .lamp.unk{ background:#979797; }
+
+    @media (max-width: 1180px){
+      .grid-edit{
+        grid-template-columns: 230px 1fr 74px;
+      }
+      .grid-metrics{
+        grid-template-columns: repeat(3, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 760px){
+      .grid-4,.grid-edit{
+        grid-template-columns: 1fr;
+      }
+      .label{
+        text-align:left;
+      }
+      .grid-metrics{
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="titlebar">WR2 Parameter setting</div>
+    <div class="content">
+
+      <div class="group">
+        <div class="group-title">Basic information</div>
+        <div class="grid-4" id="basicInfoGrid"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Parameters setting</div>
+        <div class="grid-edit" id="editableGrid"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Live values</div>
+        <div class="grid-metrics">
+          <div class="metric"><div class="k">PV-Leistung gesamt</div><div class="v" id="pv_input_power_w">--</div></div>
+          <div class="metric"><div class="k">Last / Verbrauch</div><div class="v" id="load_watt">--</div></div>
+          <div class="metric"><div class="k">Batteriespannung</div><div class="v" id="battery_voltage_v">--</div></div>
+          <div class="metric"><div class="k">Ladestrom</div><div class="v" id="battery_charge_current_a">--</div></div>
+          <div class="metric"><div class="k">SOC Batterie</div><div class="v" id="battery_capacity_percent">--</div></div>
+          <div class="metric"><div class="k">WR-Temperatur</div><div class="v" id="heatsink_temperature_c">--</div></div>
+        </div>
+      </div>
+
+      <div class="statusbar" id="statusLine">Lade Daten …</div>
+      <div class="applybar apply-info" id="applyStatus">Bereit. Änderungen werden robust verifiziert.</div>
+      <div class="footer" id="footerLine">Modus: --</div>
+    </div>
+  </div>
+
+  <script>
+    let latestState = null;
+    let isApplying = false;
+    let refreshTimer = null;
+    let uiBusyUntil = 0;
+    let applyBusyUntil = 0;
+
+    function nowMs(){ return Date.now(); }
+    function markUiBusy(ms = 12000){ uiBusyUntil = Math.max(uiBusyUntil, nowMs() + ms); }
+    function releaseUiBusy(delayMs = 1800){ uiBusyUntil = Math.max(uiBusyUntil, nowMs() + delayMs); }
+    function markApplyBusy(ms = 7000){ applyBusyUntil = Math.max(applyBusyUntil, nowMs() + ms); }
+    function refreshBlocked(){ return isApplying || nowMs() < uiBusyUntil || nowMs() < applyBusyUntil; }
+
+    function esc(v){
+      return String(v ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function fmt(v, suffix=""){
+      if (v === null || v === undefined || v === "") return "--";
+      return String(v) + suffix;
+    }
+
+    function normV(v){
+      if (v === null || v === undefined) return "";
+      const s = String(v).replace(",", ".").replace(/\s*V$/i, "").trim();
+      const n = Number(s);
+      if (!Number.isFinite(n)) return "";
+      return n.toFixed(1);
+    }
+
+    function setApplyStatus(kind, text){
+      const el = document.getElementById("applyStatus");
+      el.className = "applybar " + (
+        kind === "ok" ? "apply-ok" :
+        kind === "err" ? "apply-err" :
+        kind === "warn" ? "apply-warn" : "apply-info"
+      );
+      el.textContent = text;
+    }
+
+    function buildPriorityOptionList(currentCode, items){
+      return (items || []).map(o => {
+        const sel = String(o.value) === String(currentCode) ? " selected" : "";
+        return `<option value="${esc(o.value)}"${sel}>${esc(o.label)}${sel ? " ← aktiv" : ""}</option>`;
+      }).join("");
+    }
+
+    function buildVoltageOptions(currentValue, list){
+      const current = normV(currentValue);
+      return (list || []).map(v => {
+        const val = String(v);
+        const sel = normV(val) === current ? " selected" : "";
+        return `<option value="${esc(val)}"${sel}>${esc(val)} V${sel ? " ← aktiv" : ""}</option>`;
+      }).join("");
+    }
+
+    function statusBox(text, cls=""){
+      return `<div class="readonly ${cls}">${esc(text || "--")}</div>`;
+    }
+
+    function findSwitch(data, key){
+      return (data.switches || []).find(x => String(x.key) === String(key)) || null;
+    }
+
+    function switchText(sw){
+      if (!sw) return "--";
+      if (sw.locked) return sw.enabled === true ? "Ein gesperrt" : (sw.enabled === false ? "Aus gesperrt" : "Gesperrt");
+      if (sw.enabled === true) return "Ein";
+      if (sw.enabled === false) return "Aus";
+      return "--";
+    }
+
+    function switchClass(sw){
+      if (!sw) return "";
+      if (sw.locked) return "status-lock";
+      if (sw.enabled === true) return "status-ok";
+      if (sw.enabled === false) return "status-err";
+      return "";
+    }
+
+    function renderBasicInfo(data){
+      const s = data.settings || {};
+      const p = data.priority || {};
+      const m = data.meta || {};
+      const d = data.device || {};
+      const r = data.recommendation || {};
+      const swA = findSwitch(data, "A");
+      const swH = findSwitch(data, "H");
+
+      const online = d.online === true;
+      const lampClass = d.online === true ? "ok" : (d.online === false ? "err" : "unk");
+      const onlineText = d.online === true ? "WR2 online" : (d.online === false ? "WR2 offline" : "WR2 Status unbekannt");
+
+      let recommendationText = "--";
+      if (r && r.text) {
+        const currentPsp = p.psp?.code || "";
+        const currentPcp = p.pcp?.code || "";
+        const recPsp = r.psp || "";
+        const recPcp = r.pcp || "";
+        if (recPsp && recPcp && currentPsp && currentPcp && (recPsp !== currentPsp || recPcp !== currentPcp)) {
+          recommendationText = "Keine belastbare Empfehlung";
+        } else {
+          recommendationText = r.text;
+        }
+      }
+
+      const fields = [
+        ["WR online", `<span class="pill"><span class="lamp ${lampClass}"></span>${esc(onlineText)}</span>`, true],
+        ["Stand", m.generated_at || "--"],
+        ["Modus", d.mode_text || "--"],
+        ["Datenalter", d.timestamp || "--"],
+        ["Ladequelle Priorität", p.pcp?.label || "--"],
+        ["Solar power priority", p.psp?.label || "--"],
+        ["Output source priority", p.pop?.label || "--"],
+        ["Prioritätszustand", `${p.psp?.code || "--"} + ${p.pcp?.code || "--"}`],
+        ["Recharge / Redischarge", `${fmt(s.battery_recharge_voltage_v, " V")} / ${fmt(s.battery_redischarge_voltage_v, " V")}`],
+        ["Battery cut-off voltage", fmt(s.battery_cutoff_voltage_v, " V")],
+        ["Bulk / Float", `${fmt(s.bulk_voltage_v, " V")} / ${fmt(s.floating_voltage_v, " V")}`],
+        ["Batterietyp", s.battery_type || "--"],
+        ["Max. Ladestrom", fmt(s.max_charge_current_a, " A")],
+        ["Max. AC Ladestrom", fmt(s.max_ac_charge_current_a, " A")],
+        ["Statusbits roh", data.raw_debug?.flag_raw || "--"],
+        ["Warnungen / Empfehlung", recommendationText]
+      ];
+
+      document.getElementById("basicInfoGrid").innerHTML = fields.map(([k,v,isHtml]) => `
+        <div class="label">${esc(k)}</div>
+        <div class="readonly ${k === "Summer stummschalten" ? switchClass(swA) : (k === "Fehlercode-Protokoll speichern" ? switchClass(swH) : "")}">${isHtml ? v : esc(v)}</div>
+      `).join("");
+    }
+
+    function installUiBusyHandlers(){
+      document.querySelectorAll("select").forEach(sel => {
+        if (sel.dataset.uiBusyBound === "1") return;
+        sel.dataset.uiBusyBound = "1";
+
+        sel.addEventListener("focus", () => markUiBusy(15000));
+        sel.addEventListener("mousedown", () => markUiBusy(15000));
+        sel.addEventListener("touchstart", () => markUiBusy(15000), { passive: true });
+        sel.addEventListener("click", () => markUiBusy(15000));
+        sel.addEventListener("pointerdown", () => markUiBusy(15000));
+
+        sel.addEventListener("change", () => releaseUiBusy(1800));
+        sel.addEventListener("blur", () => releaseUiBusy(1800));
+
+        sel.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" || e.key === "Enter" || e.key === "Tab") {
+            releaseUiBusy(1800);
+          } else {
+            markUiBusy(15000);
+          }
+        });
+      });
+    }
+
+    function renderEditable(data){
+      const s = data.settings || {};
+      const p = data.priority || {};
+
+      const pspOptions = [
+        { value:"PSP0", label:"Batterie → Last → Netz" },
+        { value:"PSP1", label:"Solar → Last → Batterie → Netz" },
+        { value:"PSP2", label:"Solar → Last → Netz → Batterie" }
+      ];
+
+      const pcpOptions = [
+        { value:"PCP0", label:"Solar + Netz" },
+        { value:"PCP2", label:"Nur Solar" },
+        { value:"PCP3", label:"Solar zuerst / Hybrid" }
+      ];
+
+      const popOptions = [
+        { value:"POP0", label:"Batterie → Last → Netz" },
+        { value:"POP1", label:"Solar → Batterie → Netz" },
+        { value:"POP2", label:"Solar → Netz → Batterie" }
+      ];
+
+      const voltRecharge = ["46.0","47.0","48.0","49.0","50.0"];
+      const voltRedischarge = ["49.0","50.0","51.0","52.0","53.0","54.0","55.0"];
+      const voltCutoff = ["45.0","45.1","45.2","45.3","45.4","45.5","45.6","45.7","45.8","45.9","46.0","46.1","46.2","46.3","46.4","46.5","46.6","46.7","46.8","46.9","47.0","47.1","47.2","47.3","47.4","47.5","47.6","47.7","47.8","47.9","48.0"];
+      const voltBulk = ["54.0","54.1","54.2","54.3","54.4","54.5","54.6","54.7","54.8","54.9","55.0","55.1","55.2","55.3","55.4","55.5"];
+      const voltFloat = ["54.0","54.1","54.2","54.3","54.4","54.5","54.6","54.7","54.8","54.9","55.0","55.1","55.2","55.3","55.4","55.5","55.6","55.7","55.8","55.9","56.0"];
+
+      const swA = findSwitch(data, "A");
+      const swH = findSwitch(data, "H");
+
+      const rows = [
+        [
+          "Output priority",
+          `<select id="sel_output_priority">${buildPriorityOptionList(p.pop?.code, popOptions)}</select>`,
+          `<button class="btn" onclick="applySetting('pop','sel_output_priority','Output priority erfolgreich gesetzt.')">Apply</button>`,
+          "Aktueller Output-Modus",
+          `<div class="readonly">${esc(p.pop?.label || "--")}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Charger priority",
+          `<select id="sel_charger_priority">${buildPriorityOptionList(p.pcp?.code, pcpOptions)}</select>`,
+          `<button class="btn" onclick="applySetting('pcp','sel_charger_priority','Charger priority erfolgreich gesetzt.')">Apply</button>`,
+          "Aktueller Charger-Modus",
+          `<div class="readonly">${esc(p.pcp?.label || "--")}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Back to grid voltage",
+          `<select id="sel_recharge_voltage">${buildVoltageOptions(s.battery_recharge_voltage_v, voltRecharge)}</select>`,
+          `<button class="btn" onclick="applyBucd()">Apply</button>`,
+          "Aktueller Back-to-grid-Wert",
+          `<div class="readonly">${esc(fmt(s.battery_recharge_voltage_v, " V"))}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Back to discharge voltage",
+          `<select id="sel_redischarge_voltage">${buildVoltageOptions(s.battery_redischarge_voltage_v, voltRedischarge)}</select>`,
+          `<button class="btn" onclick="applyBucd()">Apply</button>`,
+          "Aktueller Back-to-discharge-Wert",
+          `<div class="readonly">${esc(fmt(s.battery_redischarge_voltage_v, " V"))}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Bulk charging voltage (C.V. voltage)",
+          `<select id="sel_bulk_voltage">${buildVoltageOptions(s.bulk_voltage_v, voltBulk)}</select>`,
+          `<button class="btn" onclick="applyBulkFloat()">Apply</button>`,
+          "Aktueller Bulk-Wert",
+          `<div class="readonly">${esc(fmt(s.bulk_voltage_v, " V"))}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Floating charging voltage",
+          `<select id="sel_float_voltage">${buildVoltageOptions(s.floating_voltage_v, voltFloat)}</select>`,
+          `<button class="btn" onclick="applyBulkFloat()">Apply</button>`,
+          "Aktueller Float-Wert",
+          `<div class="readonly">${esc(fmt(s.floating_voltage_v, " V"))}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Solar power priority",
+          `<select id="sel_solar_priority">${buildPriorityOptionList(p.psp?.code, pspOptions)}</select>`,
+          `<button class="btn" onclick="applySetting('psp','sel_solar_priority','Solar power priority erfolgreich gesetzt.')">Apply</button>`,
+          "Aktueller Solar-Modus",
+          `<div class="readonly">${esc(p.psp?.label || "--")}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ],
+        [
+          "Cut-off",
+          `<select id="sel_cutoff_voltage">${buildVoltageOptions(s.battery_cutoff_voltage_v, voltCutoff)}</select>`,
+          `<button class="btn" onclick="applyPsdv()">Apply</button>`,
+          "Aktueller Cut-off-Wert",
+          `<div class="readonly">${esc(fmt(s.battery_cutoff_voltage_v, " V"))}</div>`,
+          `<button class="btn" disabled>Status</button>`
+        ]
+      ];
+
+      document.getElementById("editableGrid").innerHTML = rows.map(r => `
+        <div class="label">${r[0]}</div>
+        <div>${r[1]}</div>
+        <div>${r[2]}</div>
+        <div class="label">${r[3]}</div>
+        <div>${r[4]}</div>
+        <div>${r[5]}</div>
+      `).join("");
+
+      installUiBusyHandlers();
+    }
+
+    function renderMetrics(data){
+      const m = data.metrics || {};
+      document.getElementById("pv_input_power_w").textContent = fmt(m.pv_power_w, " W");
+      document.getElementById("load_watt").textContent = fmt(m.load_power_w, " W");
+      document.getElementById("battery_voltage_v").textContent = fmt(m.battery_voltage_v, " V");
+      document.getElementById("battery_charge_current_a").textContent = fmt(m.charge_current_a, " A");
+      document.getElementById("battery_capacity_percent").textContent = fmt(m.soc_percent, " %");
+      document.getElementById("heatsink_temperature_c").textContent = fmt(m.wr_temp_c, " °C");
+    }
+
+    function renderStatusLine(data){
+      const online = data.device?.online === true;
+      const lampClass = online ? "ok" : "err";
+      const mode = data.device?.mode_text || "--";
+      const pv = data.metrics?.pv_power_w ?? "--";
+      const load = data.metrics?.load_power_w ?? "--";
+      const prio = `${data.priority?.psp?.code || "--"} + ${data.priority?.pcp?.code || "--"}`;
+
+      document.getElementById("statusLine").innerHTML =
+        `<span class="pill"><span class="lamp ${lampClass}"></span>` +
+        `Aktueller WR2 Status: Modus ${esc(mode)} | PV ${esc(pv)} W | Last ${esc(load)} W | Priorität: ${esc(prio)}</span>`;
+    }
+
+    function renderFooter(data){
+      const mode = data.device?.mode_text || "--";
+      const age = data.device?.timestamp || "--";
+      document.getElementById("footerLine").textContent =
+        `Modus: ${mode} | Setzbar verifiziert: PSP, PCP, POP, Bulk/Float, Recharge/Redischarge, Cut-off | Datenalter: ${age}`;
+    }
+
+    async function refreshData(keepStatus){
+      try{
+        const r = await fetch("wr2_state.json?v=" + Date.now(), { cache: "no-store" });
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        const data = await r.json();
+        latestState = data;
+        renderBasicInfo(data);
+        renderEditable(data);
+        renderMetrics(data);
+        renderStatusLine(data);
+        renderFooter(data);
+        if (!keepStatus) setApplyStatus("info", "Bereit. Änderungen werden robust verifiziert.");
+      }catch(e){
+        setApplyStatus("err", "Laden von wr2_state.json fehlgeschlagen: " + e.message);
+      }
+    }
+
+    async function postJson(url, payload){
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json;charset=UTF-8" },
+        body: JSON.stringify(payload)
+      });
+      const txt = await res.text();
+      let obj = null;
+      try { obj = JSON.parse(txt); } catch(_) {}
+      if (!res.ok) throw new Error(obj?.error || txt || ("HTTP " + res.status));
+      if (obj && obj.ok === false) throw new Error(obj.error || obj.raw_output || "Apply fehlgeschlagen");
+      return obj || txt;
+    }
+
+    async function loadState(){
+      await refreshData(true);
+    }
+
+    async function applySetting(kind, selId, successText){
+      const sel = document.getElementById(selId);
+      if (!sel || isApplying) return;
+
+      isApplying = true;
+      markUiBusy(2500);
+      markApplyBusy(5000);
+      setApplyStatus("info", `Sende ${kind} = ${sel.value} ... bitte warten`);
+
+      try{
+        const apiValue = String(sel.value).replace(/^[A-Za-z]+/, '');
+        await postJson('/wr2-api/set', { kind, value: apiValue });
+        await loadState();
+        setApplyStatus("ok", successText);
+      }catch(e){
+        setApplyStatus("err", "Apply fehlgeschlagen: " + e.message);
+      }finally{
+        isApplying = false;
+        releaseUiBusy(2200);
+        renderEditable(latestState || {});
+        installUiBusyHandlers();
+      }
+    }
+
+    async function applyBulkFloat(){
+      if (isApplying) return;
+      const bulk = document.getElementById("sel_bulk_voltage")?.value;
+      const flt = document.getElementById("sel_float_voltage")?.value;
+
+      isApplying = true;
+      markUiBusy(2500);
+      markApplyBusy(6000);
+      setApplyStatus("info", `Sende Bulk/Float = ${bulk} / ${flt} ... bitte warten`);
+
+      try{
+        await postJson('/wr2-api/set-bulk-float', { bulk_v: bulk, float_v: flt });
+        await loadState();
+        setApplyStatus("ok", "Bulk/Float erfolgreich gesetzt.");
+      }catch(e){
+        setApplyStatus("err", "Bulk/Float fehlgeschlagen: " + e.message);
+      }finally{
+        isApplying = false;
+        releaseUiBusy(2200);
+        renderEditable(latestState || {});
+        installUiBusyHandlers();
+      }
+    }
+
+    async function applyBucd(){
+      if (isApplying) return;
+      const recharge = document.getElementById("sel_recharge_voltage")?.value;
+      const redischarge = document.getElementById("sel_redischarge_voltage")?.value;
+
+      isApplying = true;
+      markUiBusy(2500);
+      markApplyBusy(6000);
+      setApplyStatus("info", `Sende Recharge/Redischarge = ${recharge} / ${redischarge} ... bitte warten`);
+
+      try{
+        await postJson('/wr2-api/set-bucd', {
+          recharge_v: recharge,
+          redischarge_v: redischarge
+        });
+        await loadState();
+        setApplyStatus("ok", "Recharge/Redischarge erfolgreich gesetzt.");
+      }catch(e){
+        setApplyStatus("err", "Recharge/Redischarge fehlgeschlagen: " + e.message);
+      }finally{
+        isApplying = false;
+        releaseUiBusy(2200);
+        renderEditable(latestState || {});
+        installUiBusyHandlers();
+      }
+    }
+
+    async function applyPsdv(){
+      if (isApplying) return;
+      const cutoff = document.getElementById("sel_cutoff_voltage")?.value;
+
+      isApplying = true;
+      markUiBusy(2500);
+      markApplyBusy(6000);
+      setApplyStatus("info", `Sende Cut-off = ${cutoff} ... bitte warten`);
+
+      try{
+        await postJson('/wr2-api/set-psdv', { cutoff_v: cutoff });
+        await loadState();
+        setApplyStatus("ok", "Cut-off erfolgreich gesetzt.");
+      }catch(e){
+        setApplyStatus("err", "Cut-off fehlgeschlagen: " + e.message);
+      }finally{
+        isApplying = false;
+        releaseUiBusy(2200);
+        renderEditable(latestState || {});
+        installUiBusyHandlers();
+      }
+    }
+
+    refreshData(false);
+    refreshTimer = setInterval(() => {
+      if(!refreshBlocked()) refreshData(true);
+    }, 5000);
+  </script>
+</body>
+</html>
