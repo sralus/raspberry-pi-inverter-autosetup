@@ -8,4 +8,5 @@ User=pi
 Group=pi
 WorkingDirectory={{runtime_dir}}
 Environment=OUTPUT_JSON={{state_json}}
+Environment=LATEST_JSON={{latest_json}}
 ExecStart=/usr/bin/python3 {{runtime_dir}}/wr2_state_builder.py
