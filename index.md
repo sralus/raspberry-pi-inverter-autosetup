@@ -16,6 +16,16 @@ This project helps set up **PI30 / WR1** and **PI18 / WR2** inverter environment
 - Uses device-based service names
 - Consistent `latest_json` handling from installer to builder services
 
+## UI Preview
+
+### WR1 / PI30 UI
+
+![WR1 / PI30 UI](WR1_full.png)
+
+### WR2 / PI18 UI
+
+![WR2 / PI18 UI](WR2_full.png)
+
 ## Project Structure
 
 - **PI30 / WR1** → `watchpower-like`
