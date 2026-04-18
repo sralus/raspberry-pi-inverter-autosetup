@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import sys
 from getpass import getpass
 
 
@@ -33,7 +34,10 @@ def ask_yes_no(prompt: str, default: bool = True) -> bool:
 
 
 def ask_secret(prompt: str) -> str:
-    return getpass(f"{prompt}: ")
+    full_prompt = f"{prompt}: "
+    if sys.stdin.isatty():
+        return getpass(full_prompt)
+    return input(full_prompt).strip()
 
 
 def ask_choice(prompt: str, choices: dict[int, str], default: int) -> int:
