@@ -66,6 +66,7 @@ def main() -> int:
         "install_root": paths["install_root"],
         "runtime_dir": paths["runtime_dir"],
         "tools_dir": paths["tools_dir"],
+        "latest_json": paths["latest_json"],
         "ui_dir": str(ui_dir),
         "state_json": paths["state_json"],
         "config_path": paths["config_path"],
