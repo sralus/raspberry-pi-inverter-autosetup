@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from datetime import datetime
 
-SOURCE_FILE = "/home/pi/wr-logs/WR1_latest.json"
+SOURCE_FILE = os.environ.get("LATEST_JSON", "/home/pi/wr-logs/WR1_latest.json")
 OUTPUT_JSON = os.environ.get("OUTPUT_JSON", str(Path(__file__).resolve().parent.parent / "ui" / "wr1_state.json"))
 
 
