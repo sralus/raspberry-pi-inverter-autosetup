@@ -1,4 +1,6 @@
-# Raspberry Pi Inverter Auto-Setup
+# Raspberry Pi Inverter Auto-Setup for PI30 / PI18
+
+This project provides a Raspberry Pi auto-setup for PI30 and PI18 inverters with WatchPower-like and SolarPower-like workflows, MQTT integration, systemd service generation, and optional built-in or external UI.
 
 Dieses Projekt enthält zwei Auto-Setups für Wechselrichter auf Raspberry Pi:
 
