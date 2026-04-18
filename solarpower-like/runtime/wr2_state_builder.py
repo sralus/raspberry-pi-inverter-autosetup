@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 from datetime import datetime
 
-SOURCE_FILE = "/home/pi/wr-logs/WR2_latest.json"
+SOURCE_FILE = os.environ.get("LATEST_JSON", "/home/pi/wr-logs/WR2_latest.json")
 OVERRIDE_FILE = os.environ.get("OVERRIDE_FILE", str(Path(__file__).resolve().parent / "wr2_ui_state_override.json"))
 OUTPUT_JSON = os.environ.get("OUTPUT_JSON", str(Path(__file__).resolve().parent.parent / "ui" / "wr2_state.json"))
 
