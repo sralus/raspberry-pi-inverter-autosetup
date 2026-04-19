@@ -16,6 +16,7 @@ BROKER_HOST = os.environ.get("BROKER_HOST", "192.168.0.69")
 BROKER_PORT = int(os.environ.get("BROKER_PORT", "1883"))
 BROKER_USERNAME = os.environ.get("BROKER_USERNAME", "")
 BROKER_PASSWORD = os.environ.get("BROKER_PASSWORD", "")
+MQTT_ENABLED = os.environ.get("MQTT_ENABLED", "true").strip().lower() in ("1", "true", "yes", "on")
 
 DEVICE_PATH = "/dev/WR1"
 DEVICE_NAME = "WR1"
@@ -1091,10 +1092,10 @@ def main() -> int:
         except Exception as e:
             log(f"influx init error {e}")
 
-    log(f"start device={dev} name={device_name} broker={BROKER_HOST}:{BROKER_PORT} interval={interval}s")
+    log(f"start device={dev} name={device_name} mqtt_enabled={MQTT_ENABLED} broker={BROKER_HOST}:{BROKER_PORT} interval={interval}s")
     load_last_good_snapshot(device_name)
 
-    client = mqtt_connect()
+    client = mqtt_connect() if MQTT_ENABLED else None
     sleep_abortable(STARTUP_DELAY_SEC)
 
     try:
@@ -1156,7 +1157,8 @@ def main() -> int:
 
         try:
             client.loop_stop()
-            client.disconnect()
+            if client is not None:
+                client.disconnect()
         except Exception:
             pass
 
