@@ -9,6 +9,7 @@ import posixpath
 import subprocess
 import sys
 import traceback
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -33,14 +34,18 @@ DEVICE = (ARGS.device or "").strip()
 READER_SERVICE = (ARGS.reader_service or "").strip()
 OVERRIDE_JSON = (CTL_PATH.parent / "wr2_ui_state_override.json") if CTL_PATH else (Path(__file__).resolve().parent.parent / "runtime" / "wr2_ui_state_override.json")
 
+
+def is_wr2_ctl() -> bool:
+    return bool(CTL_PATH and CTL_PATH.name == "wr2_ctl.py")
+
 ACTION_MAP = {
     "set_output_priority": "set-output-priority",
     "set_charger_priority": "set-charger-priority",
     "set_cutoff_voltage": "set-cutoff-voltage",
     "set_recharge_voltage": "set-recharge-voltage",
     "set_redischarge_voltage": "set-redischarge-voltage",
-    "set_bulk_voltage": "set-bulk-voltage",
-    "set_float_voltage": "set-float-voltage",
+    "set_bulk_voltage": "set-bulk-float",
+    "set_float_voltage": "set-bulk-float",
     "set_psp": "set-psp",
     "set_pcp": "set-pcp",
     "set_pop": "set-pop",
@@ -155,10 +160,11 @@ def run_ctl(action: str, value):
         env["WR1_CTL_SERVICE"] = READER_SERVICE
 
     if action in ("set_bulk_voltage", "set_float_voltage"):
-        if cmd_name == "set-bulk-float":
+        if is_wr2_ctl():
             bulk_v, float_v = resolve_bulk_float_pair(action, str(value))
-            cmd = [sys.executable, str(CTL_PATH), cmd_name, str(bulk_v), str(float_v)]
+            cmd = [sys.executable, str(CTL_PATH), "set-bulk-float", str(bulk_v), str(float_v)]
         else:
+            cmd_name = "set-bulk-voltage" if action == "set_bulk_voltage" else "set-float-voltage"
             cmd = [sys.executable, str(CTL_PATH), cmd_name, str(value)]
 
     elif action == "set_bucd":
@@ -206,18 +212,51 @@ def run_ctl(action: str, value):
         env=env,
     )
 
+    if is_wr2_ctl() and action in ("set_bulk_voltage", "set_float_voltage"):
+        stderr_l = (proc.stderr or "").lower()
+        stdout_l = (proc.stdout or "").lower()
+        if proc.returncode != 0 and ("broken pipe" in stderr_l or "broken pipe" in stdout_l):
+            time.sleep(2.0)
+            proc = subprocess.run(
+                cmd,
+                text=True,
+                capture_output=True,
+                env=env,
+            )
+
     parsed = extract_json_from_output(proc.stdout)
     if parsed is None:
-        parsed = {
-            "ok": proc.returncode == 0,
-            "error": "Controller-Ausgabe konnte nicht als JSON gelesen werden.",
-            "stdout": proc.stdout,
-            "stderr": proc.stderr,
-            "returncode": proc.returncode,
-            "action": action,
-            "requested_value": value,
-            "cmd": cmd,
-        }
+        stdout_text = proc.stdout or ""
+        stderr_text = proc.stderr or ""
+        if (
+            is_wr2_ctl()
+            and action in ("set_bulk_voltage", "set_float_voltage")
+            and proc.returncode == 0
+            and "KIND=ACK" in stdout_text
+            and "settings override updated" in stdout_text
+        ):
+            parsed = {
+                "ok": True,
+                "error": "",
+                "stdout": stdout_text,
+                "stderr": stderr_text,
+                "returncode": proc.returncode,
+                "action": action,
+                "requested_value": value,
+                "cmd": cmd,
+                "note": "WR2 controller success inferred from ACK/output",
+            }
+        else:
+            parsed = {
+                "ok": proc.returncode == 0,
+                "error": "Controller-Ausgabe konnte nicht als JSON gelesen werden.",
+                "stdout": stdout_text,
+                "stderr": stderr_text,
+                "returncode": proc.returncode,
+                "action": action,
+                "requested_value": value,
+                "cmd": cmd,
+            }
 
     parsed.setdefault("returncode", proc.returncode)
     parsed.setdefault("action", action)

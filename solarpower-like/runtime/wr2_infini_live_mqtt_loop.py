@@ -658,6 +658,8 @@ def mqtt_connect() -> mqtt.Client:
 
 
 def publish_value(client: mqtt.Client, topic: str, value: Any) -> None:
+    if client is None:
+        return
     if isinstance(value, bool):
         payload = "true" if value else "false"
     elif value is None:
