@@ -37,6 +37,7 @@ WRITE_SETTLE_SEC = 2.20
 READ_GAP_SEC = 0.80
 
 QPIRI_ONLY_ACTIONS = {
+    "set_cutoff_voltage",
     "set_recharge_voltage",
     "set_redischarge_voltage",
     "set_bulk_voltage",
@@ -515,6 +516,12 @@ def set_charger_priority(value: str) -> int:
     return set_verified_value("set_charger_priority", value, SAFE_CHARGER_PRIORITY[value], "charger_source_priority_raw")
 
 
+def set_cutoff_voltage(value: str) -> int:
+    val = normalize_voltage_arg(value)
+    write_val = normalize_voltage_write_arg(value)
+    return set_verified_value("set_cutoff_voltage", val, f"PSDV{write_val}", "battery_cutoff_voltage_v")
+
+
 def set_recharge_voltage(value: str) -> int:
     val = normalize_voltage_arg(value)
     write_val = normalize_voltage_write_arg(value)
@@ -549,6 +556,9 @@ def main() -> int:
     p_chg = sub.add_parser("set-charger-priority", help="Set WR1 charger priority")
     p_chg.add_argument("value", choices=sorted(SAFE_CHARGER_PRIORITY.keys()))
 
+    p_cutoff = sub.add_parser("set-cutoff-voltage", help="Set WR1 cutoff voltage")
+    p_cutoff.add_argument("value")
+
     p_recharge = sub.add_parser("set-recharge-voltage", help="Set WR1 recharge voltage")
     p_recharge.add_argument("value")
 
@@ -567,6 +577,8 @@ def main() -> int:
         return set_output_priority(args.value)
     if args.cmd == "set-charger-priority":
         return set_charger_priority(args.value)
+    if args.cmd == "set-cutoff-voltage":
+        return set_cutoff_voltage(args.value)
     if args.cmd == "set-recharge-voltage":
         return set_recharge_voltage(args.value)
     if args.cmd == "set-redischarge-voltage":

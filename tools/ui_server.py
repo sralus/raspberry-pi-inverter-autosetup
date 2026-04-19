@@ -34,17 +34,25 @@ READER_SERVICE = (ARGS.reader_service or "").strip()
 OVERRIDE_JSON = (CTL_PATH.parent / "wr2_ui_state_override.json") if CTL_PATH else (Path(__file__).resolve().parent.parent / "runtime" / "wr2_ui_state_override.json")
 
 ACTION_MAP = {
+    "set_output_priority": "set-output-priority",
+    "set_charger_priority": "set-charger-priority",
+    "set_cutoff_voltage": "set-cutoff-voltage",
+    "set_recharge_voltage": "set-recharge-voltage",
+    "set_redischarge_voltage": "set-redischarge-voltage",
+    "set_bulk_voltage": "set-bulk-voltage",
+    "set_float_voltage": "set-float-voltage",
     "set_psp": "set-psp",
     "set_pcp": "set-pcp",
     "set_pop": "set-pop",
-    "set_bulk_voltage": "set-bulk-float",
-    "set_float_voltage": "set-bulk-float",
     "set_bucd": "set-bucd",
     "set_psdv": "set-psdv",
     "set_flag": "set-flag",
 }
 
-UNSUPPORTED_ACTIONS = {}
+UNSUPPORTED_ACTIONS = {
+    
+}
+
 
 
 def json_bytes(obj) -> bytes:
@@ -147,8 +155,11 @@ def run_ctl(action: str, value):
         env["WR1_CTL_SERVICE"] = READER_SERVICE
 
     if action in ("set_bulk_voltage", "set_float_voltage"):
-        bulk_v, float_v = resolve_bulk_float_pair(action, str(value))
-        cmd = [sys.executable, str(CTL_PATH), cmd_name, str(bulk_v), str(float_v)]
+        if cmd_name == "set-bulk-float":
+            bulk_v, float_v = resolve_bulk_float_pair(action, str(value))
+            cmd = [sys.executable, str(CTL_PATH), cmd_name, str(bulk_v), str(float_v)]
+        else:
+            cmd = [sys.executable, str(CTL_PATH), cmd_name, str(value)]
 
     elif action == "set_bucd":
         if not isinstance(value, dict):
